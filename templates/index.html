@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Учет велосипедов</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background: #f4f4f4;
+            margin: 20px;
+        }
+        .main-box {
+            width: 750px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border: 1px solid #ccc;
+        }
+        h1 { text-align: center; }
+        .btn {
+            padding: 10px;
+            font-size: 15px;
+            cursor: pointer;
+            color: white;
+            border: none;
+        }
+        #btn1 { background: #007bff; }
+        #btn2 { background: #28a745; }
+
+        #status-text {
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+            color: red;
+            margin-top: 15px;
+            margin-bottom: 15px;
+        }
+        #res-img {
+            width: 100%;
+            display: none;
+            border: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-box">
+        <h1>Детекция велосипедов</h1>
+
+        <div style="text-align: center;">
+            <input type="file" id="foto">
+            <button class="btn" id="btn1" onclick="sendImg()">1. Начать анализ</button>
+            <button class="btn" id="btn2" onclick="getPDF()">2. Скачать PDF</button>
+        </div>
+
+        <div id="status-text">Загрузите фото парковки для проверки</div>
+
+        <!-- <img src="static/result.jpg" id="res-img"> -->
+        <img id="res-img" src="" alt="тут будет результат">
+    </div>
+
+    <script>
+        async function sendImg() {
+            let file_input = document.getElementById('foto');
+            let status_div = document.getElementById('status-text');
+            let image_box = document.getElementById('res-img');
+
+            if (file_input.files.length == 0) {
+                alert("Эй, сначала выбери файл!");
+                return;
+            }
+
+            status_div.style.color = 'black';
+            status_div.innerText = "Обработка, подождите...";
+
+            let fd = new FormData();
+            fd.append('image', file_input.files[0]);
+
+            try {
+                // console.log("отправляю запрос");
+                let req = await fetch('/process', {
+                    method: 'POST',
+                    body: fd
+                });
+
+                let otvet = await req.json();
+
+                if (otvet.error) {
+                    alert(otvet.error);
+                    return;
+                }
+
+                // выводим инфу
+                status_div.style.color = 'red';
+                status_div.innerText = "Обнаружено велосипедов: " + otvet.count + " шт.";
+
+                // чтоб картинка обновлялась и не кешировалась добавляем рандомное число
+                image_box.src = '/static/result.jpg?' + Math.random();
+                image_box.style.display = 'block';
+
+            } catch (e) {
+                status_div.innerText = "ошибка сервера";
+                console.log(e);
+            }
+        }
+
+        function getPDF() {
+            // просто редирект
+            window.location.href = '/report';
+        }
+    </script>
+
+</body>
+</html>
