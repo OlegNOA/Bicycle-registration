@@ -4,7 +4,7 @@ from flask import Flask, request, jsonify, render_template, send_file
 import cv2
 import numpy as np
 from ultralytics import YOLO
-from reportlab.lib.pagesizes import letter
+from reportlab.lib.pagesizes import A4
 from reportlab.pdfgen import canvas
 # подключаем шрифты, чтоб русский текст в пдф работал
 from reportlab.pdfbase import pdfmetrics
@@ -82,7 +82,7 @@ def create_report():
     # print(data)
 
     pdf_path = 'static/report.pdf'
-    c = canvas.Canvas(pdf_path, pagesize=letter)
+    c = canvas.Canvas(pdf_path, pagesize=A4)
 
     # регаем шрифт arial
     pdfmetrics.registerFont(TTFont('Arial', 'arial.ttf'))
